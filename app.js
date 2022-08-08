@@ -22,7 +22,7 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-const connectDB=require("./config/db");
+const connectDB = require("./config/db");
 connectDB();
 const userSchema = new mongoose.Schema({
   email: {
@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
     trim: true,
-  }
+  },
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -43,13 +43,11 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 app.get("/url", async function (req, res) {
-  if (req.isAuthenticated()){
-  const shorturl = await ShortUrl.find();
-  res.render("short", { shorturl: shorturl });
-  }
-  else{
+  if (req.isAuthenticated()) {
+    const shorturl = await ShortUrl.find();
+    res.render("short", { shorturl: shorturl });
+  } else {
     res.redirect("/login");
-
   }
 });
 app.get("/", function (req, res) {
@@ -88,29 +86,30 @@ app.post("/url", async function (req, res) {
   await ShortUrl.create({ full: req.body.fullUrl });
   res.redirect("/url");
 });
-
+var k = 1;
 app.post("/register", function (req, res) {
-  User.findOne({username: req.body.username}, function(err, user){
-    if(err)
-    console.log(err);
-    if(user){
-      return res.redirect("/login");
+  User.findOne({ username: req.body.username }, function (err, user) {
+    if (err) console.log(err);
+    if (user) {
+      k = 0;
     }
-  })
-  User.register(
-    { username: req.body.username },
-    req.body.password,
-    function (err, user) {
-      if (err) {
-        console.log(err);
-        res.redirect("/register");
-      } else {
-        passport.authenticate("local")(req, res, function () {
-          res.redirect("/short");
-        });
+  });
+  if (k) {
+    User.register(
+      { username: req.body.username },
+      req.body.password,
+      function (err, user) {
+        if (err) {
+          console.log(err);
+          res.redirect("/register");
+        } else {
+          passport.authenticate("local")(req, res, function () {
+            res.redirect("/short");
+          });
+        }
       }
-    }
-  );
+    );
+  }
 });
 app.get("/logout", function (req, res, next) {
   req.logout(function (err) {
