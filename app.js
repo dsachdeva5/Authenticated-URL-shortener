@@ -51,12 +51,13 @@ app.get("/url", async function (req, res) {
   }
 });
 app.get("/", function (req, res) {
+ 
   res.render("home");
 });
 app.get("/login", function (req, res) {
   res.render("login");
 });
-app.get("/register", function (req, res) {
+app.get("/signin", function (req, res) {
   res.render("register");
 });
 app.get("/short", function (req, res) {
@@ -66,26 +67,9 @@ app.get("/short", function (req, res) {
     res.redirect("/login");
   }
 });
-app.post("/delete", async function (req, res) {
-  const dlt = req.body.clear;
-  await ShortUrl.findByIdAndRemove(dlt, function (err) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("Deleted!");
-      res.redirect("/url");
-    }
-  })
-    .clone()
-    .catch(function (err) {
-      console.log(err);
-    });
-});
 
-app.post("/url", async function (req, res) {
-  await ShortUrl.create({ full: req.body.fullUrl });
-  res.redirect("/url");
-});
+
+
 var k = 1;
 app.post("/register", function (req, res) {
   User.findOne({ username: req.body.username }, function (err, user) {
@@ -101,7 +85,7 @@ app.post("/register", function (req, res) {
       function (err, user) {
         if (err) {
           console.log(err);
-          res.redirect("/register");
+          res.redirect("/login");
         } else {
           passport.authenticate("local")(req, res, function () {
             res.redirect("/short");
@@ -136,13 +120,7 @@ app.post("/login", function (req, res) {
   });
 });
 
-app.get("/:topic", async function (req, res) {
-  const st = await ShortUrl.findOne({ short: req.params.topic });
-  if (st == null) return res.sendStatus(404);
-  await st.click++;
-  await st.save();
-  res.redirect(st.full);
-});
+
 app.listen(port, function () {
   console.log("server has started");
 });
